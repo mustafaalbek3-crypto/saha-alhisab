@@ -405,7 +405,7 @@ function recalc(){
   decisionBox.className = 'decision playmore';
   decisionBox.textContent = `الفارق: ${rawDiff} نقطة — الفريق الأعلى: ${higherName}`;
 
-  const neededToWin = rawDiff;
+  const neededToWin = rawDiff + 1;
   const neededNormalRaw = neededToWin - TRICK_BASE.normal;                          // normal hand: subtract the 25 base
   const neededMeyuRaw = Math.ceil((neededToWin - TRICK_BASE.meyu) / 2);             // meyu hand: subtract the 50 base, then halve
 
