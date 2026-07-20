@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ساحة الحساب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --felt-dark:#123526;
+    --felt-mid:#1c4a35;
+    --felt-line: rgba(201,162,75,0.18);
+    --parchment:#f4ecd8;
+    --parchment-2:#efe3c6;
+    --ink:#20180f;
+    --ink-soft:#5a4f3c;
+    --gold:#c9a24b;
+    --gold-bright:#e4c774;
+    --teamA:#c9a24b;
+    --teamA-deep:#8a6c2b;
+    --teamB:#a13d3d;
+    --teamB-deep:#712828;
+    --danger:#b3402f;
+    --ok:#3f7d5c;
+    --radius:14px;
+    --shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, var(--felt-mid), transparent 60%),
+      radial-gradient(1200px 700px at 100% 110%, var(--felt-mid), transparent 55%),
+      var(--felt-dark);
+    background-attachment:fixed;
+    color:var(--parchment);
+    font-family:'Cairo', sans-serif;
+    padding: 28px 18px 60px;
+  }
+  .knock-row{
+    display:flex; justify-content:center; gap:10px; margin-bottom:6px; opacity:0.75;
+  }
+  .knock-row span{
+    display:inline-block; width:3px; height:22px; background:var(--gold);
+    border-radius:2px; transform:rotate(-4deg);
+  }
+  .knock-row span:nth-child(3n){transform:rotate(6deg);}
+  .knock-row span:nth-child(2n){height:16px; opacity:0.6;}
+
+  header{ text-align:center; margin-bottom: 22px; }
+  h1{
+    font-family:'Aref Ruqaa', serif;
+    font-size: 2.6rem;
+    margin: 0 0 4px;
+    color: var(--gold-bright);
+    letter-spacing: 1px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  .subtitle{ color: var(--parchment-2); opacity:0.8; font-size:0.95rem; }
+
+  .wrap{ max-width: 1180px; margin: 0 auto; }
+
+  .card{
+    background: linear-gradient(180deg, var(--parchment), var(--parchment-2));
+    color: var(--ink);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,0.08);
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+
+  .teams-head{
+    display:grid;
+    grid-template-columns: 1fr 90px 1fr;
+    gap: 14px;
+    align-items:center;
+  }
+  .team-box{
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.5);
+    border: 2px solid transparent;
+  }
+  .team-box.a{ border-color: var(--teamA); }
+  .team-box.b{ border-color: var(--teamB); }
+  .team-box label{ font-size:0.75rem; color:var(--ink-soft); display:block; margin-bottom:4px; }
+  .team-box input{
+    width:100%; font-family:'Cairo',sans-serif; font-weight:700; font-size:1.05rem;
+    border:none; background:transparent; color:var(--ink); border-bottom:1px dashed rgba(0,0,0,0.2);
+    padding:4px 2px; margin-bottom:8px; outline:none;
+  }
+  .team-box input:focus{ border-bottom-color: var(--ink); }
+  .vs{ text-align:center; font-family:'Aref Ruqaa',serif; font-size:1.6rem; color: var(--gold-bright); }
+
+  .totals-strip{
+    display:grid; grid-template-columns: 1fr 90px 1fr;
+    gap:14px; margin-top: 14px;
+  }
+  .total-num{
+    text-align:center; border-radius:12px; padding: 10px 8px;
+    font-weight:800; font-size:1.9rem; font-family:'Aref Ruqaa',serif;
+  }
+  .total-num.a{ background: color-mix(in srgb, var(--teamA) 20%, white); color: var(--teamA-deep); }
+  .total-num.b{ background: color-mix(in srgb, var(--teamB) 20%, white); color: var(--teamB-deep); }
+  .total-label{ text-align:center; font-size:0.7rem; color:var(--ink-soft); }
+  .diff-box{ display:flex; flex-direction:column; justify-content:center; align-items:center; }
+  .diff-box .n{ font-size:1.1rem; font-weight:800; }
+
+  table.score{ width:100%; border-collapse:collapse; margin-top:6px; }
+  table.score th{
+    font-size:0.78rem; color:var(--ink-soft); font-weight:700; padding:6px 4px; text-align:center;
+    border-bottom:2px solid rgba(0,0,0,0.15);
+  }
+  table.score td{ padding:6px 4px; text-align:center; border-bottom:1px solid rgba(0,0,0,0.08); vertical-align:middle; }
+  table.score tr.round-final td{ background: rgba(201,162,75,0.15); }
+  .rnum{ font-family:'Aref Ruqaa',serif; font-size:1.2rem; color:var(--ink-soft); width:34px; }
+
+  select, .numin{
+    font-family:'Cairo',sans-serif; padding:6px 8px; border-radius:8px; border:1px solid rgba(0,0,0,0.2);
+    background:#fff; color:var(--ink); font-size:0.85rem; width:100%;
+  }
+  .numin{ text-align:center; }
+
+  .cellA, .cellB{ min-width:110px; }
+  .score-fill{ font-weight:800; font-size:1.05rem; }
+  .score-fill.a{ color: var(--teamA-deep); }
+  .score-fill.b{ color: var(--teamB-deep); }
+  .marks{ letter-spacing:2px; font-weight:800; opacity:0.55; font-size:1rem; }
+  .marks.a{ color: var(--teamA-deep); }
+  .marks.b{ color: var(--teamB-deep); }
+  .empty-dash{ opacity:0.25; }
+
+  .settings-grid{
+    display:grid; grid-template-columns: repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-top:10px;
+  }
+  .settings-grid .field{ display:flex; flex-direction:column; gap:4px; }
+  .settings-grid label{ font-size:0.75rem; color:var(--ink-soft); }
+
+  .info-toggle{
+    cursor:pointer; font-size:0.8rem; color: var(--teamB-deep); text-decoration:underline dotted;
+    background:none; border:none; padding:0; margin-top:8px;
+  }
+  .info-box{
+    margin-top:8px; font-size:0.82rem; line-height:1.7; background: rgba(0,0,0,0.04);
+    border-radius:8px; padding:10px 12px; display:none;
+  }
+  .info-box.show{ display:block; }
+
+  .decision{
+    margin-top:14px; padding:14px; border-radius:12px; font-weight:700; text-align:center;
+    font-size:1rem; border:2px dashed rgba(0,0,0,0.15);
+  }
+  .decision.playmore{ background: rgba(63,125,92,0.12); color: var(--ok); border-color: var(--ok); }
+  .decision.ended{ background: rgba(179,64,47,0.12); color: var(--danger); border-color: var(--danger); }
+  .decision.pending{ color:var(--ink-soft); }
+
+  .reset-btn{
+    display:block; margin: 6px auto 0; background: transparent; border:1px solid var(--parchment-2);
+    color: var(--parchment-2); padding:8px 18px; border-radius:20px; cursor:pointer; font-family:'Cairo',sans-serif;
+    opacity:0.75; font-size:0.85rem;
+  }
+  .reset-btn:hover{ opacity:1; }
+
+  .save-note{ text-align:center; font-size:0.75rem; color:var(--parchment-2); opacity:0.6; margin-top:6px; }
+
+  @media (max-width:640px){
+    h1{ font-size:2rem; }
+    .teams-head, .totals-strip{ grid-template-columns: 1fr; }
+    .vs{ order:2; }
+    table.score{ font-size:0.78rem; }
+    .cellA, .cellB{ min-width:auto; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="knock-row"><span></span><span></span><span></span><span></span><span></span></div>
+    <h1>ساحة الحساب</h1>
+    <div class="subtitle">لعبة الورق — سبعة كيمات، وربما ثامن يفصل الحكاية</div>
+  </header>
+
+  <!-- Teams -->
+  <div class="card">
+    <div class="teams-head">
+      <div class="team-box a">
+        <label>الفريق الأول — اللاعب الأول</label>
+        <input id="a1" placeholder="اسم اللاعب">
+        <label>الفريق الأول — اللاعب الثاني</label>
+        <input id="a2" placeholder="اسم اللاعب">
+      </div>
+      <div class="vs">VS</div>
+      <div class="team-box b">
+        <label>الفريق الثاني — اللاعب الأول</label>
+        <input id="b1" placeholder="اسم اللاعب">
+        <label>الفريق الثاني — اللاعب الثاني</label>
+        <input id="b2" placeholder="اسم اللاعب">
+      </div>
+    </div>
+
+    <div class="totals-strip">
+      <div class="total-num a" id="totalA">0</div>
+      <div class="diff-box"><div class="n" id="diffN">0</div><div class="total-label">الفرق</div></div>
+      <div class="total-num b" id="totalB">0</div>
+    </div>
+    <div class="totals-strip">
+      <div class="total-label">مجموع الفريق الأول</div>
+      <div></div>
+      <div class="total-label">مجموع الفريق الثاني</div>
+    </div>
+  </div>
+
+  <!-- Score table -->
+  <div class="card">
+    <table class="score">
+      <thead>
+        <tr>
+          <th>كيم</th>
+          <th>الفريق الفائز</th>
+          <th>نوع اليد</th>
+          <th>قيمة اليد</th>
+          <th>الفريق الأول</th>
+          <th>الفريق الثاني</th>
+        </tr>
+      </thead>
+      <tbody id="roundsBody"></tbody>
+    </table>
+
+    <button class="info-toggle" id="infoToggle">ما معنى العلامات × و ×××؟</button>
+    <div class="info-box" id="infoBox">
+      عند فوز فريق باليد، توضع علامة <b>××</b> في عمود الفريق <b>الفائز</b> (بلا نقاط)، بينما تُسجَّل النقاط
+      في عمود الفريق <b>الخاسر</b>. النقاط المسجَّلة = قيمة اليد المدخلة + قيمة الطرقة: <b>25</b> نقطة إن كانت
+      الطرقة عادية، أو <b>50</b> نقطة إن كانت ميو. في حالة الميو تُضاعَف قيمة اليد المدخلة (×2) قبل إضافة الـ50،
+      وتوضع علامة <b>×××</b> في عمود الفريق الفائز إشارة لذلك.
+    </div>
+  </div>
+
+  <!-- Kime 7 special section -->
+  <div class="card" id="finalCard">
+    <h3 style="margin-top:0; font-family:'Aref Ruqaa',serif; font-size:1.3rem;">الكيم السابع — الفارق والمطلوب للكيم الثامن</h3>
+
+    <div class="decision pending" id="decisionBox">
+      أكمل بيانات الكيم السابع لتظهر هنا الفارق
+    </div>
+
+    <div class="decision pending" id="suggestBox" style="margin-top:8px;"></div>
+
+    <button class="info-toggle" id="infoToggle2">كيف يُحسب المطلوب؟</button>
+    <div class="info-box" id="infoBox2">
+      يُجمع مجموع كل فريق من نتائج الكيمات السبعة (متضمنًا قيم الطرقات)، ويُطرح المجموع الأصغر من الأكبر
+      ليظهر الفارق. يُضاف للفارق نقطة واحدة حتى لا تنتهي المباراة بالتعادل. بعدها:<br>
+      • <b>بالعادي</b>: يُطرح 25 من الفارق الناتج.<br>
+      • <b>بالميو</b>: يُطرح 50 من الفارق الناتج، ثم يُقسَم الناتج على 2 (مع التقريب للأعلى).<br>
+      مثال: فارق 361 ← عادي = 361 − 25 = 336، وميو = (361 − 50) ÷ 2 = 155.5 ← تُقرَّب إلى 156.
+    </div>
+  </div>
+
+  <button class="reset-btn" id="resetBtn">↺ بدء لعبة جديدة (مسح الكل)</button>
+  <div class="save-note" id="saveNote">يُحفظ تلقائيًا في هذا الجهاز</div>
+</div>
+
+<script>
+const ROUND_COUNT = 7; // the 8th kime is a read-only system suggestion, not a data row
+const TRICK_BASE = { normal: 25, meyu: 50 };
+
+let state = {
+  names: {a1:'', a2:'', b1:'', b2:''},
+  rounds: Array.from({length: ROUND_COUNT}, () => ({winner:'', type:'normal', raw:''}))
+};
+
+// Round score = entered hand value + trick base value.
+// Normal: raw + 25.  Meyu: (raw*2) + 50.
+function computeRoundScore(r){
+  if(!r.winner || r.raw === '' || isNaN(Number(r.raw))) return 0;
+  const raw = Number(r.raw);
+  return r.type === 'meyu' ? (raw*2 + TRICK_BASE.meyu) : (raw + TRICK_BASE.normal);
+}
+
+// Display is reversed: the WINNING team's column shows the ×× / ××× marks,
+// and the LOSING team's column shows the actual score.
+function cellsFor(r, score){
+  const markA = `<span class="marks a">${r.type==='meyu'?'×××':'××'}</span>`;
+  const markB = `<span class="marks b">${r.type==='meyu'?'×××':'××'}</span>`;
+  const scoreA = `<span class="score-fill a">${score}</span>`;
+  const scoreB = `<span class="score-fill b">${score}</span>`;
+  const dash = `<span class="empty-dash">—</span>`;
+
+  let aCell, bCell;
+  if(r.winner === 'A'){
+    aCell = markA;   // A won -> mark in A's column
+    bCell = scoreB;  // B lost -> points in B's column
+  } else if(r.winner === 'B'){
+    aCell = scoreA;  // A lost -> points in A's column
+    bCell = markB;   // B won -> mark in B's column
+  } else {
+    aCell = dash;
+    bCell = dash;
+  }
+  return {aCell, bCell};
+}
+
+function renderRounds(){
+  const body = document.getElementById('roundsBody');
+  body.innerHTML = '';
+  for(let i=0;i<ROUND_COUNT;i++){
+    const r = state.rounds[i];
+    const tr = document.createElement('tr');
+    tr.id = 'row-'+i;
+    if(i===6) tr.classList.add('round-final');
+    const score = computeRoundScore(r);
+    const {aCell, bCell} = cellsFor(r, score);
+
+    tr.innerHTML = `
+      <td class="rnum">${i+1}</td>
+      <td>
+        <select data-idx="${i}" data-field="winner" class="winnerSel">
+          <option value="">—</option>
+          <option value="A" ${r.winner==='A'?'selected':''}>الفريق الأول</option>
+          <option value="B" ${r.winner==='B'?'selected':''}>الفريق الثاني</option>
+        </select>
+      </td>
+      <td>
+        <select data-idx="${i}" data-field="type" class="typeSel">
+          <option value="normal" ${r.type==='normal'?'selected':''}>عادي</option>
+          <option value="meyu" ${r.type==='meyu'?'selected':''}>ميو (مضاعف)</option>
+        </select>
+      </td>
+      <td>
+        <input type="number" min="0" class="numin rawIn" data-idx="${i}" value="${r.raw}">
+      </td>
+      <td class="cellA">${aCell}</td>
+      <td class="cellB">${bCell}</td>
+    `;
+    body.appendChild(tr);
+  }
+
+  body.querySelectorAll('.winnerSel').forEach(el=>{
+    el.addEventListener('change', e=>{
+      state.rounds[+e.target.dataset.idx].winner = e.target.value;
+      persist(); recalc();
+    });
+  });
+  body.querySelectorAll('.typeSel').forEach(el=>{
+    el.addEventListener('change', e=>{
+      state.rounds[+e.target.dataset.idx].type = e.target.value;
+      persist(); recalc();
+    });
+  });
+  body.querySelectorAll('.rawIn').forEach(el=>{
+    el.addEventListener('input', e=>{
+      state.rounds[+e.target.dataset.idx].raw = e.target.value;
+      persist(); recalc();
+    });
+  });
+}
+
+function updateCells(){
+  for(let i=0;i<ROUND_COUNT;i++){
+    const row = document.getElementById('row-'+i);
+    if(!row) continue;
+    const r = state.rounds[i];
+    const score = computeRoundScore(r);
+    const {aCell, bCell} = cellsFor(r, score);
+    row.querySelector('.cellA').innerHTML = aCell;
+    row.querySelector('.cellB').innerHTML = bCell;
+  }
+}
+
+function recalc(){
+  let totalA=0, totalB=0;
+  state.rounds.forEach((r,i)=>{
+    const s = computeRoundScore(r);
+    // Reversed: the score is credited to the LOSING team's total.
+    if(r.winner==='A') totalB += s;
+    if(r.winner==='B') totalA += s;
+  });
+
+  document.getElementById('totalA').textContent = totalA;
+  document.getElementById('totalB').textContent = totalB;
+  const diff = Math.abs(totalA-totalB);
+  document.getElementById('diffN').textContent = diff;
+
+  updateCells(); // update score/mark cells in place — does NOT touch inputs, so typing keeps focus
+
+  const round7 = state.rounds[6];
+  const decisionBox = document.getElementById('decisionBox');
+  const suggestBox = document.getElementById('suggestBox');
+  if(!round7.winner){
+    decisionBox.className = 'decision pending';
+    decisionBox.textContent = 'أكمل بيانات الكيم السابع لتظهر هنا الفارق';
+    suggestBox.className = 'decision pending';
+    suggestBox.textContent = '';
+    return;
+  }
+
+  const higherTotal = Math.max(totalA, totalB);
+  const lowerTotal = Math.min(totalA, totalB);
+  const higherName = totalA >= totalB ? teamLabel('B') : teamLabel('A');
+  const lowerName = totalA < totalB ? teamLabel('B') : teamLabel('A');
+  const rawDiff = higherTotal - lowerTotal; // higher team's total minus lower team's total
+
+  decisionBox.className = 'decision playmore';
+  decisionBox.textContent = `الفارق: ${rawDiff} نقطة — الفريق الأعلى: ${higherName}`;
+
+  const neededToWin = rawDiff;
+  const neededNormalRaw = neededToWin - TRICK_BASE.normal;                          // normal hand: subtract the 25 base
+  const neededMeyuRaw = Math.ceil((neededToWin - TRICK_BASE.meyu) / 2);             // meyu hand: subtract the 50 base, then halve
+
+  suggestBox.className = 'decision pending';
+  suggestBox.innerHTML = `المطلوب من ${lowerName} في الكيم الثامن:<br>
+    عادي: مطلوب <b>${neededNormalRaw}</b><br>
+    ميو: مطلوب <b>${neededMeyuRaw}</b>`;
+}
+
+function teamLabel(which){
+  if(which==='A'){
+    const n1 = document.getElementById('a1').value.trim();
+    const n2 = document.getElementById('a2').value.trim();
+    return (n1||n2) ? [n1,n2].filter(Boolean).join(' و ') : 'الفريق الأول';
+  } else {
+    const n1 = document.getElementById('b1').value.trim();
+    const n2 = document.getElementById('b2').value.trim();
+    return (n1||n2) ? [n1,n2].filter(Boolean).join(' و ') : 'الفريق الثاني';
+  }
+}
+
+function persist(){
+  try{
+    window.storage.set('scorecard-state', JSON.stringify(state)).catch(()=>{});
+  }catch(e){}
+}
+
+async function loadState(){
+  try{
+    const res = await window.storage.get('scorecard-state');
+    if(res && res.value){
+      const loaded = JSON.parse(res.value);
+      state = Object.assign(state, loaded);
+    }
+  }catch(e){ /* no saved state yet */ }
+
+  document.getElementById('a1').value = state.names.a1;
+  document.getElementById('a2').value = state.names.a2;
+  document.getElementById('b1').value = state.names.b1;
+  document.getElementById('b2').value = state.names.b2;
+
+  renderRounds();
+  recalc();
+}
+
+['a1','a2','b1','b2'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', e=>{
+    state.names[id] = e.target.value;
+    persist(); recalc();
+  });
+});
+
+document.getElementById('infoToggle').addEventListener('click', ()=>{
+  document.getElementById('infoBox').classList.toggle('show');
+});
+document.getElementById('infoToggle2').addEventListener('click', ()=>{
+  document.getElementById('infoBox2').classList.toggle('show');
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(!confirm('هل تريد فعلاً مسح كل بيانات اللعبة الحالية؟')) return;
+  state = {
+    names: {a1:'', a2:'', b1:'', b2:''},
+    rounds: Array.from({length: ROUND_COUNT}, () => ({winner:'', type:'normal', raw:''}))
+  };
+  persist();
+  loadState();
+});
+
+loadState();
+</script>
+</body>
+</html>
